@@ -1,0 +1,20 @@
+api:
+  security:
+    token:
+      secret: private.key
+      public: public.key
+spring:
+  application:
+    name: festivo-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/db_festivo
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+server:
+  port: 8080
