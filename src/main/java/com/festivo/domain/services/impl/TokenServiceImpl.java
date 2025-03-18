@@ -50,7 +50,7 @@ public class TokenServiceImpl implements TokenService {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             String subject = JWT.require(algorithm)
-                    .withIssuer("StockFlowAPI")
+                    .withIssuer(issuer)
                     .build()
                     .verify(token)
                     .getSubject();

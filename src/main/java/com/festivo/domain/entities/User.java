@@ -27,7 +27,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = true, unique = true, name = "phone_number", length = 25)
+    @Column(nullable = false, unique = true, name = "phone_number", length = 25)
     private String phoneNumber;
 
     @Column(nullable = false)
@@ -36,8 +36,9 @@ public class User implements UserDetails {
     @Column(nullable = false, name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(nullable = true, name = "profile_picture")
-    private String profilePicture;
+    @Basic(fetch = FetchType.LAZY)
+    @Column(nullable = true, name = "profile_picture", columnDefinition = "bytea")
+    private byte[] profilePicture;
 
     @OneToMany(mappedBy = "creator")
     @Column(nullable = false)
@@ -86,7 +87,6 @@ public class User implements UserDetails {
         this.phoneNumber = userSignupRequestDTO.phoneNumber();
         this.password = userSignupRequestDTO.password();
         this.birthDate = userSignupRequestDTO.birthDate();
-        this.profilePicture = userSignupRequestDTO.profilePicture();
 
         this.createdEvents = new ArrayList<>();
         this.organizedEvents = new ArrayList<>();
@@ -98,13 +98,12 @@ public class User implements UserDetails {
         this.lastLogin = LocalDateTime.now();
     }
 
-    public User(String fullName, String email, String phoneNumber, String password, LocalDate birthDate, String profilePicture) {
+    public User(String fullName, String email, String phoneNumber, String password, LocalDate birthDate) {
         this.fullName = fullName;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.password = password;
         this.birthDate = birthDate;
-        this.profilePicture = profilePicture;
     }
 
     public UUID getId() {
@@ -152,11 +151,11 @@ public class User implements UserDetails {
         this.birthDate = birthDate;
     }
 
-    public String getProfilePicture() {
+    public byte[] getProfilePicture() {
         return profilePicture;
     }
 
-    public void setProfilePicture(String profilePicture) {
+    public void setProfilePicture(byte[] profilePicture) {
         this.profilePicture = profilePicture;
     }
 

@@ -28,11 +28,8 @@ public class Event {
     @Column(nullable = false, name = "end_date")
     private LocalDateTime endDate;
 
-    @Column(nullable = false)
-    private String location;
-
-    @Column(nullable = false)
-    private Double latitude;
+    @OneToOne
+    private Address address;
 
     @ManyToOne
     @JoinColumn(nullable = false, name = "creator_id")
@@ -49,11 +46,11 @@ public class Event {
     @ManyToMany(mappedBy = "invitations")
     private List<User> invitedUsers;
 
-    @Column(nullable = false, name = "event_logo")
-    private String eventLogo;
+    @Column(nullable = true, name = "party_logo")
+    private String partyLogo;
 
-    @Column(nullable = false, name = "event_banner")
-    private String eventBanner;
+    @Column(nullable = true, name = "party_banner")
+    private String partyBanner;
 
     @Column(nullable = false)
     private String status;

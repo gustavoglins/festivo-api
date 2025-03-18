@@ -13,7 +13,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -52,6 +54,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 String encryptedPassword = new BCryptPasswordEncoder().encode(userSignupRequestDTO.password());
                 newUser.setPassword(encryptedPassword);
 
+//                newUser.setProfilePicture(null);
                 userRepository.save(newUser);
 
                 var token = tokenService.generateToken(newUser);

@@ -17,9 +17,8 @@ public record UserSignupRequestDTO(
         @NotBlank(message = "Password is required.")
         String password,
 
+        @NotBlank(message = "Phone number is required.")
         String phoneNumber,
-
-        String profilePicture,
 
         @JsonFormat(pattern = "yyyy-MM-dd")
         @NotNull(message = "Birth date is required.")
