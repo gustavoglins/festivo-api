@@ -3,6 +3,9 @@ package com.festivo.domain.entities;
 import com.festivo.api.request.user.UserSignupRequestDTO;
 import com.festivo.shared.enums.AuthRoles;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +18,9 @@ import java.util.*;
 
 @Entity
 @Table(name = "tb_user")
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
 public class User implements UserDetails {
 
     @Id
@@ -37,24 +43,24 @@ public class User implements UserDetails {
     private LocalDate birthDate;
 
     @Basic(fetch = FetchType.LAZY)
-    @Column(nullable = true, name = "profile_picture", columnDefinition = "bytea")
+    @Column(name = "profile_picture", columnDefinition = "bytea")
     private byte[] profilePicture;
 
     @OneToMany(mappedBy = "creator")
     @Column(nullable = false)
-    private List<Event> createdEvents;
+    private List<Party> createdParties;
 
     @ManyToMany(mappedBy = "organizers")
-    @Column(nullable = true, name = "organized_events")
-    private List<Event> organizedEvents;
+    @Column(name = "organized_parties")
+    private List<Party> organizedParties;
 
     @ManyToMany
     @JoinTable(
-            name = "event_invitations",
+            name = "part_invitations",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "event_id")
+            inverseJoinColumns = @JoinColumn(name = "party_id")
     )
-    private List<Event> invitations;
+    private List<Party> invitations;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
@@ -88,8 +94,8 @@ public class User implements UserDetails {
         this.password = userSignupRequestDTO.password();
         this.birthDate = userSignupRequestDTO.birthDate();
 
-        this.createdEvents = new ArrayList<>();
-        this.organizedEvents = new ArrayList<>();
+        this.createdParties = new ArrayList<>();
+        this.organizedParties = new ArrayList<>();
         this.invitations = new ArrayList<>();
         this.notifications = new ArrayList<>();
 
@@ -104,107 +110,6 @@ public class User implements UserDetails {
         this.phoneNumber = phoneNumber;
         this.password = password;
         this.birthDate = birthDate;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    public byte[] getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(byte[] profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
-    public List<Event> getCreatedEvents() {
-        return createdEvents;
-    }
-
-    public List<Event> getOrganizedEvents() {
-        return organizedEvents;
-    }
-
-    public List<Event> getInvitations() {
-        return invitations;
-    }
-
-    public List<Notification> getNotifications() {
-        return notifications;
-    }
-
-    public AuthRoles getAuthRole() {
-        return authRole;
-    }
-
-    public void setAuthRole(AuthRoles authRole) {
-        this.authRole = authRole;
-    }
-
-    public Boolean getActive() {
-        return isActive;
-    }
-
-    public void setActive(Boolean active) {
-        isActive = active;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public LocalDateTime getLastLogin() {
-        return lastLogin;
-    }
-
-    public void setLastLogin(LocalDateTime lastLogin) {
-        this.lastLogin = lastLogin;
     }
 
     @Override
@@ -237,17 +142,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }

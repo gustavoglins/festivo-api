@@ -13,9 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
 
@@ -54,12 +52,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 String encryptedPassword = new BCryptPasswordEncoder().encode(userSignupRequestDTO.password());
                 newUser.setPassword(encryptedPassword);
 
-//                newUser.setProfilePicture(null);
                 userRepository.save(newUser);
 
                 var token = tokenService.generateToken(newUser);
                 log.info("Signup successful: User '{}' successfully registered.", userSignupRequestDTO.email());
-                return new AuthResponse(token);
+                return new AuthResponse(token, newUser.getFullName());
             } else {
                 log.error("User '{}' already registered.", userSignupRequestDTO.email());
                 throw new RuntimeException("Signup failed: Email already registered");
@@ -82,7 +79,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             log.info("Authentication successful for user: {}", authenticatedUser.getUsername());
 
             User user = userRepository.findByEmail(authenticatedUser.getUsername());
-            if(user == null) {
+            if (user == null) {
                 log.error("Authenticated user not found in the database: {}", authenticatedUser.getUsername());
                 throw new IllegalStateException("User not found in the database");
             }
@@ -90,7 +87,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             var token = tokenService.generateToken(user);
             log.info("Login successful for user: {}", authenticatedUser.getUsername());
 
-            return new AuthResponse(token);
+            return new AuthResponse(token, user.getFullName());
         } catch (Exception exception) {
             log.error("Error during login attempt for user: {}", exception.getMessage());
             throw new RuntimeException("Error during login attempt for user: ", exception);

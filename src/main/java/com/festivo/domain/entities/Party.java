@@ -1,16 +1,23 @@
 package com.festivo.domain.entities;
 
+import com.festivo.shared.enums.PartyStatus;
 import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
-@Table(name = "tb_event")
-public class Event {
+@Table(name = "tb_party")
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
+public class Party {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -19,16 +26,19 @@ public class Event {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String description;
 
-    @Column(nullable = false, name = "start_date")
-    private LocalDateTime startDate;
+    @Column(nullable = false, name = "date")
+    private LocalDate date;
 
-    @Column(nullable = false, name = "end_date")
-    private LocalDateTime endDate;
+    @Column(nullable = false, name = "start_time")
+    private LocalTime startTime;
 
-    @OneToOne
+    @Column(nullable = false, name = "end_time")
+    private LocalTime endTime;
+
+    @OneToOne(optional = false, cascade = CascadeType.ALL)
     private Address address;
 
     @ManyToOne
@@ -37,23 +47,22 @@ public class Event {
 
     @ManyToMany
     @JoinTable(
-            name = "event_organizers",
-            joinColumns = @JoinColumn(name = "event_id"),
+            name = "party_organizers",
+            joinColumns = @JoinColumn(name = "party_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private List<User> organizers;
 
     @ManyToMany(mappedBy = "invitations")
-    private List<User> invitedUsers;
+    private List<User> guests;
 
-    @Column(nullable = true, name = "party_logo")
-    private String partyLogo;
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "banner", columnDefinition = "bytea")
+    private byte[] banner;
 
-    @Column(nullable = true, name = "party_banner")
-    private String partyBanner;
-
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private PartyStatus status;
 
     @CreationTimestamp
     @Column(nullable = false)
@@ -62,16 +71,4 @@ public class Event {
     @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        Event event = (Event) o;
-        return Objects.equals(id, event.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
-    }
 }

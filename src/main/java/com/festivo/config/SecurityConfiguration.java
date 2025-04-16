@@ -37,8 +37,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/user/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/user/profile-photo").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user/upload-profile-photo").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/party/").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
