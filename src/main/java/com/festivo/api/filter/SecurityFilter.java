@@ -39,7 +39,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             return;
         }
         String path = request.getRequestURI();
-        if (path.equals("/api/auth/login") || path.equals("/api/auth/signup")) {
+        if (path.equals("/api/auth/login") || path.equals("/api/auth/signup") || path.equals("/reset-password")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -56,15 +56,20 @@ public class SecurityFilter extends OncePerRequestFilter {
                     log.info("User authenticated: {}", user.getUsername());
                 } else {
                     log.error("User not found for the login: " + subjectLogin);
-                    throw new UsernameNotFoundException("User not found for the login: " + subjectLogin);
+                    filterChain.doFilter(request, response);
+                    return;
+                    //throw new UsernameNotFoundException("User not found for the login: " + subjectLogin);
                 }
             } else {
                 log.error("Invalid token detected. The token could not be validated.");
-                throw new BadCredentialsException("Invalid token detected. The token could not be validated.");
+                filterChain.doFilter(request, response);
+                return;
+                //throw new BadCredentialsException("Invalid token detected. The token could not be validated.");
             }
         } else {
-            log.error("No token provided or token is missing. Authentication cannot proceed.");
-            throw new IllegalArgumentException("No token provided. Authentication cannot proceed.");
+            log.warn("No token provided or token is missing. Authentication cannot proceed.");
+            filterChain.doFilter(request, response);
+            return;
         }
 
         filterChain.doFilter(request, response);

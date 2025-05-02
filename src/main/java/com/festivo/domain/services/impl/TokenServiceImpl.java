@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 @Service
 public class TokenServiceImpl implements TokenService {
@@ -34,13 +36,34 @@ public class TokenServiceImpl implements TokenService {
             String token = JWT.create()
                     .withIssuer(issuer)
                     .withSubject(user.getEmail())
-                    .withExpiresAt(genExpirationDate())
+//                    .withExpiresAt(genExpirationDate())
+                    .withExpiresAt(Date.from(Instant.now().plus(2, ChronoUnit.HOURS)))
                     .sign(algorithm);
             log.info("Token generated successfully for user: '{}'", user.getUsername());
             return token;
         } catch (JWTCreationException exception) {
             log.error("Error while generating token for user: '{}'", user.getUsername());
             throw new RuntimeException("Error whiling generating token: " + exception.getMessage());
+        }
+    }
+
+    @Override
+    public String generateResetPasswordToken(User user) {
+        log.info("Starting reset password token generation for user: '{}'", user.getUsername());
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            String token = JWT.create()
+                    .withIssuer(issuer)
+                    .withSubject(user.getEmail())
+                    .withClaim("purpose", "reset_password")
+                    .withIssuedAt(new Date())
+                    .withExpiresAt(Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)))
+                    .sign(algorithm);
+            log.info("Reset password token generated successfully for user: '{}'", user.getUsername());
+            return token;
+        } catch (JWTCreationException exception) {
+            log.error("Error while generating reset password token for user: '{}'", user);
+            throw new RuntimeException("Error while generating reset password token: " + exception.getMessage());
         }
     }
 

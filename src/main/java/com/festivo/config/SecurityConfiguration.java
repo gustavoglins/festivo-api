@@ -41,6 +41,8 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/user/profile-photo").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/user/upload-profile-photo").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/party/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/forgot-password").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/reset-password").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

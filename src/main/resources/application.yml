@@ -1,15 +1,19 @@
+resend:
+  api:
+    key: ${RESEND_API_KEY}
 api:
+  email: contact@gustavoglins.com
   security:
     token:
-      secret: private.key
-      public: public.key
+      secret: ${PRIVATE_KEY}
+      public: ${PUBLIC_KEY}
 spring:
   application:
     name: festivo-api
   datasource:
     url: jdbc:postgresql://localhost:5432/db_festivo
-    username: postgres
-    password: postgres
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,6 +23,21 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 20MB
+  mail:
+    host: email-smtp.us-east-1.amazonaws.com
+    port: 587
+    username: ${AWS_SES_USERNAME}
+    password: ${AWS_SES_PASSWORD}
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
 server:
   port: 8080
 file:

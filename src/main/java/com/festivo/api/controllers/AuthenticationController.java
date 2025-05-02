@@ -1,5 +1,7 @@
 package com.festivo.api.controllers;
 
+import com.festivo.api.request.auth.ForgotPasswordRequest;
+import com.festivo.api.request.auth.ResetPasswordRequest;
 import com.festivo.api.request.user.UserLoginRequestDTO;
 import com.festivo.api.request.user.UserSignupRequestDTO;
 import com.festivo.api.response.user.AuthResponse;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,5 +43,21 @@ public class AuthenticationController {
         AuthResponse response = authenticationService.login(userLoginRequestDTO);
         log.info("Successfully logged in user with email: {}", userLoginRequestDTO.email());
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) throws Exception {
+        log.info("Received forgot password request for user: '{}'", forgotPasswordRequest.email());
+        authenticationService.sendResetPasswordEmail(forgotPasswordRequest);
+        log.info("Successfully, if the email exists, the password reset email has been sent to the user: '{}'", forgotPasswordRequest.email());
+        return ResponseEntity.ok(Map.of("message", "If the email exists, a reset password link has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        log.info("Received reset password request for user: '{}'", resetPasswordRequest.token());
+        authenticationService.resetPassword(resetPasswordRequest);
+        log.info("Successfully reset password for user: '{}'", resetPasswordRequest.token());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
