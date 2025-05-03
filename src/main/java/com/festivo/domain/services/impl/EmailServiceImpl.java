@@ -50,7 +50,6 @@ public class EmailServiceImpl implements EmailService {
 
         try {
             CreateEmailResponse data = resend.emails().send(params);
-            log.info(data.toString());
         } catch (ResendException exception) {
             throw new RuntimeException(exception.getMessage(), exception.getCause());
         }

@@ -26,5 +26,5 @@ public record NewPartyRequestDTO(
         @NotNull(message = "Address is required.")
         Address address,
 
-        byte[] banner) {
+        String banner) {
 }

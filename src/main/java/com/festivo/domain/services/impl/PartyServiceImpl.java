@@ -6,33 +6,39 @@ import com.festivo.domain.entities.Party;
 import com.festivo.domain.entities.User;
 import com.festivo.domain.repositories.PartyRepository;
 import com.festivo.domain.repositories.UserRepository;
+import com.festivo.domain.services.interfaces.FileUploadDownloadService;
 import com.festivo.domain.services.interfaces.PartyService;
 import com.festivo.shared.enums.PartyStatus;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
+@Slf4j
 @Service
 public class PartyServiceImpl implements PartyService {
 
     private final PartyRepository partyRepository;
     private final UserRepository userRepository;
+    private final FileUploadDownloadService fileUploadDownloadService;
 
-    public PartyServiceImpl(PartyRepository partyRepository, UserRepository userRepository) {
+    public PartyServiceImpl(PartyRepository partyRepository, UserRepository userRepository, FileUploadDownloadService fileUploadDownloadService) {
         this.partyRepository = partyRepository;
         this.userRepository = userRepository;
+        this.fileUploadDownloadService = fileUploadDownloadService;
     }
 
     private boolean isEventNameDefined(NewPartyRequestDTO newPartyRequestDTO) {
         return newPartyRequestDTO.name() != null && !newPartyRequestDTO.name().isEmpty();
-    }
-
-    private boolean isPartyBannerDefined(NewPartyRequestDTO newPartyRequestDTO) {
-        return newPartyRequestDTO.banner() != null;
     }
 
     private byte[] loadDefaultPartyBanner() {
@@ -44,11 +50,12 @@ public class PartyServiceImpl implements PartyService {
     }
 
     @Override
-    public PartyDetailsResponseDTO create(UserDetails userDetails, NewPartyRequestDTO newPartyRequestDTO) {
+    public PartyDetailsResponseDTO create(UserDetails userDetails, NewPartyRequestDTO newPartyRequestDTO) throws IOException {
+        log.info(newPartyRequestDTO.toString());
         User partyCreator = userRepository.findByEmail(userDetails.getUsername());
         Party newParty = new Party();
 
-        // Check if there is a name for the party, if not, set it to the party name: UserName + 's Party
+        // Checks if there is a name for the party, if not, set it to the party name: "Username's Party"
         if (isEventNameDefined(newPartyRequestDTO)) newParty.setName(newPartyRequestDTO.name());
         else {
             String[] ownerFullNameParts = partyCreator.getFullName().split(" ");
@@ -56,11 +63,13 @@ public class PartyServiceImpl implements PartyService {
             newParty.setName(eventName);
         }
 
-        // Check if the user has set a banner, otherwise set a default banner
-        if (isPartyBannerDefined(newPartyRequestDTO)) newParty.setBanner(newPartyRequestDTO.banner());
-        else {
-            newParty.setBanner(this.loadDefaultPartyBanner());
-        }
+        MultipartFile multipartFile = convertBase64ToMultipartFile(
+                newPartyRequestDTO.banner(),
+                "party-banner.jpg",
+                "image/jpeg"
+        );
+
+        newParty.setBanner(newPartyRequestDTO.banner().getBytes());
 
         newParty.setDate(newPartyRequestDTO.date());
         newParty.setStartTime(newPartyRequestDTO.startTime());
@@ -72,6 +81,9 @@ public class PartyServiceImpl implements PartyService {
         newParty.setStatus(PartyStatus.PUBLISHED);
 
         Party createdParty = partyRepository.save(newParty);
+
+        // Upload the file in the S3 Bucket
+        fileUploadDownloadService.uploadFile(multipartFile);
 
         return new PartyDetailsResponseDTO(
                 createdParty.getId(),
@@ -119,5 +131,53 @@ public class PartyServiceImpl implements PartyService {
                         party.getBanner()
                 ))
                 .toList();
+    }
+
+
+    private MultipartFile convertBase64ToMultipartFile(String base64String, String fileName, String contentType) throws IOException {
+        String[] parts = base64String.split(",");
+        String base64File = parts.length > 1 ? parts[1] : parts[0];
+        byte[] decodedBytes = Base64.getDecoder().decode(base64File);
+        return new MultipartFile() {
+            @Override
+            public String getName() {
+                return "file";
+            }
+
+            @Override
+            public String getOriginalFilename() {
+                return fileName;
+            }
+
+            @Override
+            public String getContentType() {
+                return contentType;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return decodedBytes.length == 0;
+            }
+
+            @Override
+            public long getSize() {
+                return decodedBytes.length;
+            }
+
+            @Override
+            public byte[] getBytes() throws IOException {
+                return decodedBytes;
+            }
+
+            @Override
+            public InputStream getInputStream() throws IOException {
+                return new ByteArrayInputStream(decodedBytes);
+            }
+
+            @Override
+            public void transferTo(java.io.File dest) throws IOException, IllegalStateException {
+                java.nio.file.Files.copy(getInputStream(), dest.toPath());
+            }
+        };
     }
 }

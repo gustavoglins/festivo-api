@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -27,7 +28,7 @@ public class PartyController {
     }
 
     @PostMapping
-    public ResponseEntity<PartyDetailsResponseDTO> createParty(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid NewPartyRequestDTO newPartyRequestDTO) {
+    public ResponseEntity<PartyDetailsResponseDTO> createParty(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid NewPartyRequestDTO newPartyRequestDTO) throws IOException {
         log.info("Received request to create a new party, created by '{}'", userDetails.getUsername());
         PartyDetailsResponseDTO response = partyService.create(userDetails, newPartyRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

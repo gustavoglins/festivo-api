@@ -36,8 +36,6 @@ public class TokenServiceImpl implements TokenService {
             String token = JWT.create()
                     .withIssuer(issuer)
                     .withSubject(user.getEmail())
-//                    .withExpiresAt(genExpirationDate())
-                    .withExpiresAt(Date.from(Instant.now().plus(2, ChronoUnit.HOURS)))
                     .sign(algorithm);
             log.info("Token generated successfully for user: '{}'", user.getUsername());
             return token;
@@ -83,9 +81,5 @@ public class TokenServiceImpl implements TokenService {
             log.error("Token validation failed. Error: {}", exception.getMessage());
             return "";
         }
-    }
-
-    private Instant genExpirationDate() {
-        return LocalDateTime.now().plusHours(5).toInstant(ZoneOffset.of("-03:00"));
     }
 }
