@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.festivo.domain.services.interfaces.FileUploadDownloadService;
+import com.festivo.domain.services.interfaces.AwsS3Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -16,14 +16,14 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Service
-public class FileUploadDownloadServiceImpl implements FileUploadDownloadService {
+public class AwsS3ServiceImpl implements AwsS3Service {
 
     private final AmazonS3 amazonS3;
 
     @Value("${aws.s3.bucket.name}")
     private String bucketName;
 
-    public FileUploadDownloadServiceImpl(AmazonS3 amazonS3) {
+    public AwsS3ServiceImpl(AmazonS3 amazonS3) {
         this.amazonS3 = amazonS3;
     }
 
@@ -35,7 +35,7 @@ public class FileUploadDownloadServiceImpl implements FileUploadDownloadService 
         metadata.setContentType(file.getContentType());
 
         amazonS3.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
-        return fileName;
+        return getFileUrl(fileName);
     }
 
     @Override

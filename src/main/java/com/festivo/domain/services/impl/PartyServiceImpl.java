@@ -6,7 +6,7 @@ import com.festivo.domain.entities.Party;
 import com.festivo.domain.entities.User;
 import com.festivo.domain.repositories.PartyRepository;
 import com.festivo.domain.repositories.UserRepository;
-import com.festivo.domain.services.interfaces.FileUploadDownloadService;
+import com.festivo.domain.services.interfaces.AwsS3Service;
 import com.festivo.domain.services.interfaces.PartyService;
 import com.festivo.shared.enums.PartyStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +29,12 @@ public class PartyServiceImpl implements PartyService {
 
     private final PartyRepository partyRepository;
     private final UserRepository userRepository;
-    private final FileUploadDownloadService fileUploadDownloadService;
+    private final AwsS3Service awsS3Service;
 
-    public PartyServiceImpl(PartyRepository partyRepository, UserRepository userRepository, FileUploadDownloadService fileUploadDownloadService) {
+    public PartyServiceImpl(PartyRepository partyRepository, UserRepository userRepository, AwsS3Service awsS3Service) {
         this.partyRepository = partyRepository;
         this.userRepository = userRepository;
-        this.fileUploadDownloadService = fileUploadDownloadService;
+        this.awsS3Service = awsS3Service;
     }
 
     private boolean isEventNameDefined(NewPartyRequestDTO newPartyRequestDTO) {
@@ -78,8 +78,8 @@ public class PartyServiceImpl implements PartyService {
         newParty.setGuests(new ArrayList<>());
         newParty.setStatus(PartyStatus.PUBLISHED);
 
-        String fileKey = fileUploadDownloadService.uploadFile(multipartFile);
-        newParty.setBannerKey(fileKey);
+        String bannerUrl = awsS3Service.uploadFile(multipartFile);
+        newParty.setBannerUrl(bannerUrl);
 
         Party createdParty = partyRepository.save(newParty);
 
@@ -91,7 +91,7 @@ public class PartyServiceImpl implements PartyService {
                 createdParty.getStartTime(),
                 createdParty.getEndTime(),
                 createdParty.getAddress(),
-                fileUploadDownloadService.getFileUrl(fileKey)
+                createdParty.getBannerUrl()
         );
     }
 
@@ -108,7 +108,7 @@ public class PartyServiceImpl implements PartyService {
                 party.getStartTime(),
                 party.getEndTime(),
                 party.getAddress(),
-                fileUploadDownloadService.getFileUrl(party.getBannerKey())
+                party.getBannerUrl()
         );
     }
 
@@ -126,7 +126,7 @@ public class PartyServiceImpl implements PartyService {
                         party.getStartTime(),
                         party.getEndTime(),
                         party.getAddress(),
-                        fileUploadDownloadService.getFileUrl(party.getBannerKey())
+                        party.getBannerUrl()
                 ))
                 .toList();
     }
