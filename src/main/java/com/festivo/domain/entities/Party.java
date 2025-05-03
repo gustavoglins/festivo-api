@@ -56,9 +56,12 @@ public class Party {
     @ManyToMany(mappedBy = "invitations")
     private List<User> guests;
 
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "banner", columnDefinition = "bytea")
-    private byte[] banner;
+//    @Basic(fetch = FetchType.LAZY)
+//    @Column(name = "banner", columnDefinition = "bytea")
+//    private byte[] banner;
+
+    @Column(name = "banner_key")
+    private String bannerKey;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

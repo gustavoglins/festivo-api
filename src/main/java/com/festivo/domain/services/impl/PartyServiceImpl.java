@@ -69,8 +69,6 @@ public class PartyServiceImpl implements PartyService {
                 "image/jpeg"
         );
 
-        newParty.setBanner(newPartyRequestDTO.banner().getBytes());
-
         newParty.setDate(newPartyRequestDTO.date());
         newParty.setStartTime(newPartyRequestDTO.startTime());
         newParty.setEndTime(newPartyRequestDTO.endTime());
@@ -80,10 +78,10 @@ public class PartyServiceImpl implements PartyService {
         newParty.setGuests(new ArrayList<>());
         newParty.setStatus(PartyStatus.PUBLISHED);
 
-        Party createdParty = partyRepository.save(newParty);
+        String fileKey = fileUploadDownloadService.uploadFile(multipartFile);
+        newParty.setBannerKey(fileKey);
 
-        // Upload the file in the S3 Bucket
-        fileUploadDownloadService.uploadFile(multipartFile);
+        Party createdParty = partyRepository.save(newParty);
 
         return new PartyDetailsResponseDTO(
                 createdParty.getId(),
@@ -93,7 +91,7 @@ public class PartyServiceImpl implements PartyService {
                 createdParty.getStartTime(),
                 createdParty.getEndTime(),
                 createdParty.getAddress(),
-                createdParty.getBanner()
+                fileUploadDownloadService.getFileUrl(fileKey)
         );
     }
 
@@ -110,7 +108,7 @@ public class PartyServiceImpl implements PartyService {
                 party.getStartTime(),
                 party.getEndTime(),
                 party.getAddress(),
-                party.getBanner()
+                fileUploadDownloadService.getFileUrl(party.getBannerKey())
         );
     }
 
@@ -128,7 +126,7 @@ public class PartyServiceImpl implements PartyService {
                         party.getStartTime(),
                         party.getEndTime(),
                         party.getAddress(),
-                        party.getBanner()
+                        fileUploadDownloadService.getFileUrl(party.getBannerKey())
                 ))
                 .toList();
     }

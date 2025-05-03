@@ -44,4 +44,10 @@ public class FileUploadDownloadServiceImpl implements FileUploadDownloadService 
         var bytes = s3Object.getObjectContent().readAllBytes();
         return new ByteArrayResource(bytes);
     }
+
+    @Override
+    public String getFileUrl(String key) {
+        return amazonS3.getUrl(bucketName, key).toString();
+    }
+
 }

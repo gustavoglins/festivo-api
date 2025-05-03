@@ -16,6 +16,6 @@ public record PartyDetailsResponseDTO(
         LocalTime startTime,
         LocalTime endTime,
         Address address,
-        byte[] banner
+        String bannerUrl
 ) {
 }

@@ -11,4 +11,6 @@ public interface FileUploadDownloadService {
     String uploadFile(MultipartFile file) throws SdkClientException, IOException;
 
     Resource downloadFile(String fileName) throws IOException;
+
+    public String getFileUrl(String key);
 }
