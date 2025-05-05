@@ -3,9 +3,7 @@ package com.festivo.domain.entities;
 import com.festivo.api.request.user.UserSignupRequestDTO;
 import com.festivo.shared.enums.AuthRoles;
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,11 +14,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+@Data
 @Entity
 @Table(name = "tb_user")
-@Getter
-@Setter
-@EqualsAndHashCode(of = "id")
 public class User implements UserDetails {
 
     @Id
@@ -45,6 +41,17 @@ public class User implements UserDetails {
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "profile_picture", columnDefinition = "bytea")
     private byte[] profilePicture;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_friends",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
+    private Set<User> friends;
+
+    @ManyToMany(mappedBy = "friends")
+    private Set<User> friendOf;
 
     @OneToMany(mappedBy = "creator")
     @Column(nullable = false)
@@ -98,19 +105,21 @@ public class User implements UserDetails {
         this.organizedParties = new ArrayList<>();
         this.invitations = new ArrayList<>();
         this.notifications = new ArrayList<>();
+        this.friends = new HashSet<>();
+        this.friendOf = new HashSet<>();
 
         this.authRole = AuthRoles.COMMON_USER;
         this.isActive = Boolean.TRUE;
         this.lastLogin = LocalDateTime.now();
     }
 
-    public User(String fullName, String email, String phoneNumber, String password, LocalDate birthDate) {
-        this.fullName = fullName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.password = password;
-        this.birthDate = birthDate;
-    }
+//    public User(String fullName, String email, String phoneNumber, String password, LocalDate birthDate) {
+//        this.fullName = fullName;
+//        this.email = email;
+//        this.phoneNumber = phoneNumber;
+//        this.password = password;
+//        this.birthDate = birthDate;
+//    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

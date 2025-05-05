@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -93,14 +94,14 @@ public class UserServiceImpl implements UserService {
 
         if (emailHasBeenChanged(userDetails, email)) {
             if (emailAlreadyInUse(userUpdateRequestDTO.email())) {
-                throw new RuntimeException("Email already in use."); //TODO
+                throw new RuntimeException("Email already registered."); //TODO
             } else {
                 String newToken = tokenService.generateToken(retrievedUser);
             }
         }
         if (phoneNumberHasBeenChanged(retrievedUser, userUpdateRequestDTO.phoneNumber())) {
             if (phoneNumberAlreadyInUse(userUpdateRequestDTO.phoneNumber())) {
-                throw new RuntimeException("Phone number already in use."); //TODO
+                throw new RuntimeException("Phone number already registered."); //TODO
             }
         }
 
@@ -114,5 +115,10 @@ public class UserServiceImpl implements UserService {
                 retrievedUser.getEmail(),
                 retrievedUser.getPhoneNumber()
         );
+    }
+
+    @Override
+    public List<?> getUserFriends(UserDetails userDetails) {
+        return List.of();
     }
 }
