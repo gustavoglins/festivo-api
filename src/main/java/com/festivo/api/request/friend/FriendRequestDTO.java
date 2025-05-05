@@ -7,6 +7,6 @@ import java.util.UUID;
 public record FriendRequestDTO(
 
         @NotBlank(message = "Receiver id is required.")
-        UUID receiverId
+        UUID userId
 ) {
 }

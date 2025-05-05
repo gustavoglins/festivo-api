@@ -52,7 +52,7 @@ public class PartyServiceImpl implements PartyService {
     @Override
     public PartyDetailsResponseDTO create(UserDetails userDetails, NewPartyRequestDTO newPartyRequestDTO) throws IOException {
         log.info(newPartyRequestDTO.toString());
-        User partyCreator = userRepository.findByEmail(userDetails.getUsername());
+        User partyCreator = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new IllegalArgumentException("User not found"));
         Party newParty = new Party();
 
         // Checks if there is a name for the party, if not, set it to the party name: "Username's Party"
@@ -114,7 +114,7 @@ public class PartyServiceImpl implements PartyService {
 
     @Override
     public List<PartyDetailsResponseDTO> getUserParties(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername());
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         List<Party> parties = partyRepository.findAllByCreator(user);
         return parties.stream()

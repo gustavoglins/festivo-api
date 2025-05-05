@@ -100,7 +100,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             var authenticatedUser = (org.springframework.security.core.userdetails.User) auth.getPrincipal();
             log.info("Authentication successful for user: {}", authenticatedUser.getUsername());
 
-            User user = userRepository.findByEmail(authenticatedUser.getUsername());
+            User user = userRepository.findByEmail(authenticatedUser.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
             if (user == null) {
                 log.error("Authenticated user not found in the database: {}", authenticatedUser.getUsername());
                 throw new IllegalStateException("User not found in the database");
@@ -118,7 +118,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public void sendResetPasswordEmail(ForgotPasswordRequest forgotPasswordRequest) throws Exception {
-        User user = userRepository.findByEmail(forgotPasswordRequest.email());
+        User user = userRepository.findByEmail(forgotPasswordRequest.email()).orElseThrow(() -> new RuntimeException("User not found"));
         LocalDate birthDateEntered = LocalDate.parse(forgotPasswordRequest.birthDate());
 
         //TODO maybe implement logs in if case
@@ -138,7 +138,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
         String email = tokenService.validateToken(resetPasswordRequest.token());
 
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
         if (user == null) {
             log.error("User not found for email: {}", email);
             throw new RuntimeException("User not found");

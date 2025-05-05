@@ -6,9 +6,7 @@ import java.util.UUID;
 
 public interface FriendRequestService {
 
-    void sendRequest(UserDetails userDetails, UUID receiverId);
-
-    void acceptRequest(UUID requestId);
-
-    void rejectRequest(UUID requestId);
+    void sendRequest(UserDetails userDetails, UUID friendId);
+    void acceptRequest(UserDetails userDetails, UUID friendId);
+    void rejectRequest(UserDetails userDetails, UUID friendId);
 }

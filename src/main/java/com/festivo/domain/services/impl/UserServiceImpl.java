@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -57,7 +56,7 @@ public class UserServiceImpl implements UserService {
     public UserDetailsResponseDTO getUser(UserDetails userDetails) {
         log.info("Attempting to get user '{}'.", userDetails.getUsername());
         String email = userDetails.getUsername();
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found."));
         if (user == null) throw new RuntimeException("User not found");
         else return new UserDetailsResponseDTO(
                 user.getId(),
@@ -69,7 +68,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void uploadProfilePicture(UserDetails userDetails, MultipartFile file) {
-        User user = userRepository.findByEmail(userDetails.getUsername());
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found."));
 
         try {
             byte[] imageBytes = file.getBytes();
@@ -82,7 +81,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public byte[] getProfilePicture(UserDetails userDetails) {
-        User user = userRepository.findByEmail(userDetails.getUsername());
+        User user = userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("User not found."));
         return user.getProfilePicture();
     }
 
@@ -90,7 +89,7 @@ public class UserServiceImpl implements UserService {
     public UserDetailsResponseDTO update(UserDetails userDetails, UserUpdateRequestDTO userUpdateRequestDTO) {
         log.info("Attempting to update user '{}'.", userDetails.getUsername());
         String email = userDetails.getUsername();
-        User retrievedUser = userRepository.findByEmail(email);
+        User retrievedUser = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found."));
 
         if (emailHasBeenChanged(userDetails, email)) {
             if (emailAlreadyInUse(userUpdateRequestDTO.email())) {
